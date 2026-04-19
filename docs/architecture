@@ -1,0 +1,437 @@
+# Architecture
+
+# Revotek Solar Planner
+
+## 1. Architecture Principles
+
+1. Keep estimation logic deterministic where possible.
+2. Use AI only where it adds value, especially document understanding fallback and explanatory content generation.
+3. Separate business logic from UI.
+4. Treat parser confidence and estimate confidence as first-class outputs.
+5. Make pricing and recommendation rules configurable from admin.
+6. Build a stack that supports SEO, fast iteration, and maintainability.
+
+---
+
+## 2. Recommended Stack
+
+## Frontend
+- Next.js
+- TypeScript
+- Tailwind CSS
+- component library such as shadcn/ui
+
+Rationale:
+- SEO-friendly rendering
+- good DX
+- good fit for public site + app hybrid
+
+## Backend
+Option A:
+- Supabase (Postgres, auth, storage, edge functions)
+
+Option B:
+- PostgreSQL + Node/NestJS backend
+
+For MVP, Supabase is enough if engineering discipline is preserved.
+
+## Storage
+- object storage for uploaded bills
+- document storage for generated proposal PDFs
+
+## Background Processing
+- queue / async job runner for:
+  - bill parsing
+  - proposal generation
+  - email delivery
+  - heavy calculations if needed
+
+## External Integrations
+- PVGIS for production estimates
+- AEMET optional for weather enrichment later
+- email provider
+- WhatsApp deep-linking initially
+- scheduling provider (Calendly or native integration later)
+- payment provider for reservation / deposit
+- e-sign provider later if contracting is enabled
+
+---
+
+## 3. High-Level Modules
+
+### 3.1 Public Web
+Responsibilities:
+- SEO pages
+- calculator intake flow
+- results page
+- CTA / conversion actions
+
+### 3.2 Lead & Intake Service
+Responsibilities:
+- capture lead info
+- store uploaded files
+- orchestrate parsing and simulation jobs
+
+### 3.3 Invoice Parsing Service
+Responsibilities:
+- extract structured data from uploaded bills
+- return field-level confidence
+- support deterministic templates first
+- AI fallback for unknown layouts
+
+### 3.4 Consumption Engine
+Responsibilities:
+- normalize bill data
+- infer annual usage and annual cost
+- compute confidence score
+
+### 3.5 Solar Simulation Engine
+Responsibilities:
+- estimate production per proposed configuration
+- model expected yield based on location, tilt, orientation, and system sizing
+
+### 3.6 Recommendation Engine
+Responsibilities:
+- choose panel count range
+- select inverter candidate
+- evaluate battery recommendation
+- ensure compatibility with admin-managed catalog
+
+### 3.7 Savings Engine
+Responsibilities:
+- estimate self-consumption
+- estimate export
+- estimate residual grid usage
+- compute savings and break-even
+- compute multiple scenarios
+
+### 3.8 Proposal Engine
+Responsibilities:
+- assemble customer-facing result
+- generate on-screen summary
+- generate PDF proposal
+
+### 3.9 Financing Engine
+Responsibilities:
+- apply financing rules
+- compare cash vs financed options
+- simulate early repayment assumptions
+
+### 3.10 Tax Guidance Engine
+Responsibilities:
+- show current guidance content and explanatory ranges
+- remain content-driven and easy to update
+
+### 3.11 Lead Action Engine
+Responsibilities:
+- decide which CTAs to expose
+- support call booking, email delivery, WhatsApp, reservation, contracting
+- honor lead eligibility and complexity rules
+
+### 3.12 Admin Portal
+Responsibilities:
+- manage catalog
+- manage pricing and labor
+- manage financing options
+- manage tax content
+- manage lead pipeline
+- configure rules
+
+---
+
+## 4. Data Flow
+
+### Step 1: Acquisition
+User lands on SEO page or ad landing page.
+
+### Step 2: Intake
+User starts calculator and submits:
+- lead information
+- property details
+- usage profile
+- one or more bills
+
+### Step 3: Parsing
+Invoice parsing service extracts structured bill data.
+
+### Step 4: Consumption Modeling
+Consumption engine annualizes cost and usage.
+
+### Step 5: Recommendation
+Recommendation engine selects system configuration using catalog + rules.
+
+### Step 6: Simulation
+Solar simulation engine estimates production.
+
+### Step 7: Economics
+Savings engine, financing engine, and tax guidance module compute outputs.
+
+### Step 8: Result Assembly
+Proposal engine creates result view and PDF.
+
+### Step 9: Conversion
+Lead action engine exposes CTA options.
+
+### Step 10: Admin Handling
+Lead enters admin panel pipeline for follow-up.
+
+---
+
+## 5. Domain Model
+
+## Core Entities
+
+### Lead
+- id
+- name
+- email
+- phone
+- province
+- source
+- consent flags
+- status
+- created_at
+
+### Property
+- id
+- lead_id
+- address or municipality
+- province
+- property_type
+- roof_orientation
+- roof_tilt
+- shading_level
+- square_meters
+- has_aerothermal
+- has_pool
+- has_ev
+- has_ac
+
+### Invoice
+- id
+- lead_id
+- file_url
+- provider_name
+- billing_period_start
+- billing_period_end
+- contracted_power_kw
+- energy_kwh
+- energy_price_per_kwh
+- fixed_power_cost
+- invoice_total
+- parsing_confidence
+- raw_extracted_json
+
+### ConsumptionProfile
+- id
+- lead_id
+- annual_kwh_estimate
+- annual_cost_estimate
+- confidence_level
+- assumptions_json
+
+### Product
+- id
+- category
+- brand
+- model
+- technical_specs_json
+- cost_price
+- sale_price
+- active
+
+### PricingRule
+- id
+- name
+- scope
+- rule_json
+- active
+
+### FinancingOption
+- id
+- name
+- type
+- monthly_payment_formula_json
+- early_repayment_allowed
+- active
+
+### Simulation
+- id
+- lead_id
+- proposed_kwp
+- panel_count
+- panel_product_id
+- inverter_product_id
+- battery_product_id nullable
+- annual_production_kwh
+- self_consumption_ratio
+- export_kwh
+- residual_grid_kwh
+- annual_savings_eur
+- break_even_years
+- scenario_type
+- assumptions_json
+
+### Proposal
+- id
+- lead_id
+- simulation_id
+- pdf_url
+- summary_json
+- created_at
+
+### Appointment
+- id
+- lead_id
+- type
+- datetime
+- assigned_user_id
+- status
+
+---
+
+## 6. API Surface (Illustrative)
+
+## Public APIs
+- `POST /api/leads`
+- `POST /api/invoices/upload`
+- `POST /api/calculator/start`
+- `POST /api/calculator/run`
+- `GET /api/results/:leadId`
+- `POST /api/actions/book-call`
+- `POST /api/actions/request-email`
+- `POST /api/actions/create-reservation`
+
+## Admin APIs
+- `GET /api/admin/products`
+- `POST /api/admin/products`
+- `PATCH /api/admin/products/:id`
+- `GET /api/admin/leads`
+- `PATCH /api/admin/leads/:id`
+- `GET /api/admin/financing-options`
+- `PATCH /api/admin/rules/:id`
+
+---
+
+## 7. Bill Parsing Strategy
+
+## Layer 1: Deterministic Parsing
+For supported providers / layouts:
+- regex / structural extraction
+- table parsing if text PDF
+- strong field mapping
+
+## Layer 2: Assisted Parsing
+If bill is semi-structured:
+- fallback extraction rules
+- confidence scoring
+
+## Layer 3: AI Fallback
+Use LLM-based structured extraction only when needed.
+
+Important:
+- never allow the LLM output to skip validation
+- store extracted fields and confidence
+- allow manual admin correction
+
+---
+
+## 8. Calculation Philosophy
+
+## Deterministic Core
+Must remain deterministic:
+- annualization formulas
+- catalog selection logic
+- compatibility rules
+- savings formulas
+- financing formulas
+- scenario calculations
+
+## Generative Layer
+May use AI for:
+- explaining results in plain language
+- summarizing proposal narrative
+- parsing difficult bills as fallback
+
+---
+
+## 9. Recommendation Rules Strategy
+
+Recommendation should use a rules engine, not hardcoded if/else scattered in frontend code.
+
+Examples:
+- if annual consumption > X and roof usable area >= Y, suggest range A
+- if night usage high and budget allows, suggest battery option B
+- if orientation poor, lower expected yield and show warning
+- if aerothermal or pool present, increase demand profile weighting
+
+Represent rules as config-driven objects where possible.
+
+---
+
+## 10. Savings and Financial Modeling
+
+The financial model must separate:
+- fixed power term
+- variable energy term
+- direct solar offset
+- exported excess
+- battery contribution
+- residual grid consumption
+- financing cost
+- tax deduction scenario
+
+The model must support:
+- conservative / expected / optimistic scenarios
+- versioning of assumptions
+
+---
+
+## 11. Security & Compliance
+
+- protect PII and bill uploads
+- limit admin access with role-based authorization
+- store consent logs
+- allow deletion / export flows if required
+- avoid overclaiming fiscal or legal certainty
+
+---
+
+## 12. Observability
+
+Track:
+- parser success rate
+- parser confidence
+- calc completion rate
+- CTA click-through by type
+- lead to appointment conversion
+- estimate vs final project outcome
+- proposal generation failures
+
+---
+
+## 13. Deployment Strategy
+
+### Environment split
+- local
+- staging
+- production
+
+### Basic CI/CD
+- lint
+- type check
+- tests for calculation services
+- protected main branch
+- preview deployments for frontend
+
+---
+
+## 14. Future Extensions
+
+- provider-specific parser packs
+- CRM integration
+- online contracting flow
+- technical validation workflows
+- installer scheduling and route planning
+- customer portal
+- project tracking after sale
