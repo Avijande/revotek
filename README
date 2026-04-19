@@ -1,0 +1,338 @@
+# Revotek Solar Planner
+
+A conversion-focused web app for **Revotek**, a residential solar installation company in Spain.
+
+The platform helps homeowners upload electricity bills, estimate their annual electricity costs, receive a personalized solar installation proposal, understand expected savings and tax benefits, and take action immediately through **call booking, email, WhatsApp, or online contracting**.
+
+## Why this exists
+
+Revotek should not rely on a generic corporate website with a contact form.
+
+This project is designed to function as a **lead generation, qualification, and conversion engine** that:
+
+- attracts local SEO traffic,
+- parses real electricity bills,
+- builds technically credible solar proposals,
+- adapts pricing dynamically from an admin-managed catalog,
+- and converts visitors into qualified leads or direct online customers.
+
+## Core capabilities
+
+### Public app
+- Upload one or more electricity bills in PDF or image format
+- Extract key billing data:
+  - billing period
+  - contracted power
+  - energy consumed (kWh)
+  - effective €/kWh
+  - fixed power cost
+  - invoice totals
+- Estimate annual electricity usage and annual spend
+- Collect property and usage data:
+  - municipality / province
+  - roof orientation and tilt
+  - shading
+  - property size
+  - aerothermal heating, pool, AC, EV, battery preference
+- Simulate a tailored solar setup:
+  - solar panels
+  - inverter
+  - optional battery
+- Estimate annual solar production using location, orientation, tilt, and climate inputs
+- Predict:
+  - annual savings
+  - residual grid spend
+  - break-even / payback
+  - financing impact
+  - tax deduction scenarios
+- Let the user take action immediately:
+  - book a call
+  - request the proposal by email
+  - open WhatsApp with preloaded context
+  - contract online when eligible
+
+### Admin panel
+- Manage catalog:
+  - panels
+  - inverters
+  - batteries
+  - structures
+  - protections
+  - labor
+  - legalisation
+  - travel / installation extras
+- Configure pricing rules and margins
+- Configure sizing rules
+- Configure financing options
+- Manage local/provincial settings
+- Review leads and simulation results
+- Decide which conversion path is available by lead type
+
+## Product scope
+
+### MVP goals
+The MVP should be:
+- commercial-first,
+- technically credible,
+- editable by Revotek without developer intervention,
+- optimized for residential lead capture in Spain.
+
+### Non-goals for MVP
+The MVP is **not** intended to be:
+- a full ERP,
+- a universal invoice OCR engine for all utilities,
+- a full engineering design platform,
+- a legal or tax advisory system,
+- a full installer operations suite.
+
+## Target market
+
+Primary local SEO and commercial focus:
+- Salamanca
+- Ávila
+- Zamora
+- Valladolid
+
+The architecture should support easy expansion to additional provinces and local pages.
+
+## Suggested user flow
+
+1. User lands on a local SEO page
+2. User clicks **Calculate your savings**
+3. User uploads one or more electricity bills
+4. User answers a short property questionnaire
+5. System parses bills and annualizes consumption
+6. System simulates one or more solar configurations
+7. User sees a personalized proposal
+8. User chooses a conversion path:
+   - call
+   - email
+   - WhatsApp
+   - online contracting
+
+## Main product modules
+
+### 1. Marketing site and local SEO
+- province landing pages
+- service pages
+- educational content pages
+- calculator entry points
+
+### 2. Bill parsing and consumption engine
+- deterministic parsing for known invoice formats
+- structured AI fallback extraction
+- OCR fallback for scanned documents
+- confidence scoring and manual review flags
+
+### 3. Solar simulation engine
+- annual consumption extrapolation
+- property-aware system sizing
+- production estimation by location/orientation/tilt/climate
+- battery recommendation logic
+
+### 4. Proposal and pricing engine
+- dynamic equipment selection
+- editable margins and labor rules
+- configurable bundles
+- personalized commercial proposal generation
+
+### 5. Conversion engine
+- call scheduling
+- email proposal delivery
+- WhatsApp CTA orchestration
+- online reservation / contracting for eligible leads
+
+### 6. Admin backoffice
+- catalog management
+- pricing management
+- lead management
+- action routing and conversion controls
+- province and content configuration
+
+## Calculation principles
+
+The app should prioritize **credible commercial estimations**, not exaggerated promises.
+
+Important modeling constraints:
+- annual spend must distinguish fixed power cost from variable energy cost
+- annualization must reflect billing period and seasonality confidence
+- solar savings must account for:
+  - direct self-consumption
+  - battery behavior
+  - exported surplus
+  - residual grid usage
+- tax deduction output must be presented as **informational guidance**, not tax advice
+- financing must compare monthly payment, total cost, and optional early repayment effects
+
+## Recommended tech stack
+
+### Frontend
+- Next.js
+- TypeScript
+- Tailwind CSS
+
+### Backend
+- Node.js / NestJS or equivalent service architecture
+- PostgreSQL
+- Supabase can be used for rapid MVP delivery
+
+### Storage
+- object storage for bills, proposals, and admin documents
+
+### AI / document parsing
+- deterministic extraction first
+- structured LLM fallback second
+- OCR only when needed
+
+### External services
+- PVGIS for solar production estimation
+- optional weather/climate enrichment layer
+- email delivery provider
+- calendar scheduling integration
+- WhatsApp integration
+- e-sign / payment layer for online contracting
+
+## Suggested repository structure
+
+```text
+revotek-solar-planner/
+├── apps/
+│   ├── web/                    # public web app and marketing pages
+│   └── admin/                  # admin/backoffice
+├── services/
+│   ├── invoice-parser/
+│   ├── consumption-engine/
+│   ├── solar-simulation-engine/
+│   ├── pricing-engine/
+│   ├── financing-engine/
+│   ├── tax-engine/
+│   └── proposal-engine/
+├── packages/
+│   ├── ui/
+│   ├── types/
+│   ├── config/
+│   └── utils/
+├── docs/
+│   ├── prd/
+│   ├── architecture/
+│   ├── calculations/
+│   └── seo/
+├── infra/
+└── README.md
+```
+
+## Admin data model overview
+
+Core admin-managed entities:
+- Product
+- ProductCategory
+- Supplier
+- PricingRule
+- InstallationRule
+- FinancingOption
+- TaxRule
+- LabourCost
+- ProvinceConfig
+- Lead
+- Property
+- Invoice
+- Simulation
+- Proposal
+
+## Conversion philosophy
+
+This platform should not stop at “leave us your details”.
+
+Every lead should have an actionable next step. Depending on lead quality and technical complexity, the system should expose one or more of the following:
+- book a call
+- request proposal by email
+- open WhatsApp with context
+- reserve / contract online
+
+Online contracting should be available only for cases that match predefined eligibility criteria.
+
+## SEO strategy
+
+The project should support scalable local SEO with dedicated landing pages such as:
+- `/placas-solares-salamanca`
+- `/placas-solares-avila`
+- `/placas-solares-zamora`
+- `/placas-solares-valladolid`
+
+And intent-based pages such as:
+- solar panels price
+- solar panels with battery
+- solar panels for homes with pool
+- solar panels + aerothermal heating
+- tax deduction for solar panels in Spain
+- financing options
+
+## Delivery roadmap
+
+### Phase 1 — MVP
+- marketing landing pages
+- bill upload
+- parser v1
+- property questionnaire
+- solar simulation v1
+- proposal result page
+- lead capture and action CTAs
+- admin catalog management
+
+### Phase 2 — Commercial hardening
+- support for multiple invoices
+- improved parsing templates
+- financing comparison module
+- proposal PDF generation
+- CRM-style lead workflow
+- province configuration
+
+### Phase 3 — Conversion expansion
+- online reservation / contracting flow
+- e-signature
+- payment / deposit
+- advanced admin controls
+- analytics and funnel optimization
+
+## Success metrics
+
+The project should track:
+- organic traffic by province page
+- calculator start rate
+- bill upload completion rate
+- simulation completion rate
+- lead conversion rate
+- call booking rate
+- WhatsApp initiation rate
+- proposal-to-sale conversion
+- estimate accuracy versus final installed project
+
+## Project principles
+
+- Commercial-first
+- Clear and credible calculations
+- Strong local SEO foundation
+- Admin-editable pricing and catalog
+- Fast lead activation
+- No overengineering in MVP
+- Honest ranges instead of inflated promises
+
+## Related documents
+
+This repository should be accompanied by:
+- full PRD
+- architecture document
+- calculation specification
+- data model
+- backlog / implementation roadmap
+
+## Current status
+
+This repository README is intended as a starting point for a clean build session in Cursor and future planning with ChatGPT.
+
+The next logical artifacts are:
+1. detailed PRD
+2. domain/data model
+3. API and service boundaries
+4. implementation backlog
+5. first wireframes
