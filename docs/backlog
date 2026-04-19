@@ -1,0 +1,332 @@
+# Backlog
+
+# Revotek Solar Planner
+
+## 1. Backlog Structure
+
+This backlog is organized into:
+- Foundation
+- Public acquisition
+- Calculator flow
+- Parsing and calculation engines
+- Proposal and conversion
+- Admin portal
+- Platform hardening
+
+Priorities:
+- P0 = required for MVP
+- P1 = important after MVP core is functional
+- P2 = later phase
+
+---
+
+## 2. Epic: Foundation
+
+### P0-001 Repository setup
+Create monorepo or clean single-repo structure with app, docs, and shared logic.
+
+**Acceptance criteria**
+- repository initialized
+- README in place
+- docs folder in place
+- environment variable strategy documented
+
+### P0-002 App skeleton
+Set up Next.js + TypeScript + Tailwind application.
+
+**Acceptance criteria**
+- app runs locally
+- basic layout and routing in place
+- lint and formatting configured
+
+### P0-003 Data layer setup
+Set up database, storage, and base schema.
+
+**Acceptance criteria**
+- environments configured
+- migrations possible
+- file storage configured
+- auth strategy defined for admin
+
+---
+
+## 3. Epic: Public Acquisition Website
+
+### P0-010 Home page
+Build homepage with value proposition and CTA to calculator.
+
+### P0-011 SEO local landing template
+Create reusable landing template for provinces / cities.
+
+### P0-012 Conversion sections
+Add trust sections, FAQs, process explanation, and CTA modules.
+
+### P1-013 Intent pages
+Create dedicated pages for financing, tax deduction, battery, aerothermal, pool, etc.
+
+---
+
+## 4. Epic: Calculator Intake
+
+### P0-020 Lead capture step
+Collect name, email, phone, consent.
+
+### P0-021 Property step
+Collect location, property type, square meters, roof details.
+
+### P0-022 Usage profile step
+Collect major loads and battery interest.
+
+### P0-023 Bill upload step
+Allow PDF upload and status display.
+
+### P0-024 Intake persistence
+Persist partial progress so the flow is resilient.
+
+---
+
+## 5. Epic: Invoice Parsing
+
+### P0-030 Invoice storage pipeline
+Upload bill and store metadata.
+
+### P0-031 Deterministic parser v1
+Support initial parsing for target provider layouts.
+
+### P0-032 Parsing confidence model
+Return confidence level for extracted fields.
+
+### P1-033 AI fallback parser
+Add fallback structured extraction for unsupported layouts.
+
+### P1-034 Manual validation UI
+Allow admin or user confirmation if confidence is low.
+
+---
+
+## 6. Epic: Consumption and Annualization
+
+### P0-040 Consumption normalization
+Normalize extracted bill values into internal schema.
+
+### P0-041 Annual cost estimator
+Estimate annual electricity cost based on available data.
+
+### P0-042 Annual consumption estimator
+Estimate annual kWh based on available data.
+
+### P1-043 Confidence-aware estimation
+Differentiate full-year vs partial-year vs low-confidence output.
+
+---
+
+## 7. Epic: Solar Recommendation Engine
+
+### P0-050 Product catalog schema
+Define products for panels, inverters, batteries, accessories.
+
+### P0-051 Recommendation rules v1
+Implement baseline rules for system sizing.
+
+### P0-052 Inverter selection logic
+Select inverter based on proposed system characteristics.
+
+### P0-053 Battery recommendation v1
+Recommend battery yes/no and model candidate.
+
+### P1-054 Advanced usage profile weighting
+Improve logic for aerothermal, pool, AC, EV, night load.
+
+---
+
+## 8. Epic: Production Simulation
+
+### P0-060 PVGIS integration spike
+Validate integration approach for production estimates.
+
+### P0-061 Production estimate service
+Build service returning annual yield estimate.
+
+### P0-062 Scenario modeling
+Return conservative / expected / optimistic production ranges.
+
+### P1-063 Weather enrichment
+Assess whether AEMET or local adjustment layer improves output.
+
+---
+
+## 9. Epic: Savings & Financial Engine
+
+### P0-070 Savings model v1
+Estimate direct savings, residual grid usage, and export.
+
+### P0-071 Break-even model
+Compute simple and financed break-even outputs.
+
+### P0-072 Financing model v1
+Support multiple financing options with monthly payment and total cost.
+
+### P0-073 Tax guidance module v1
+Show deduction ranges and disclaimers.
+
+### P1-074 Early repayment scenario
+Support tax-refund-based early repayment illustration.
+
+---
+
+## 10. Epic: Results & Proposal
+
+### P0-080 Results page UI
+Build customer-facing results page.
+
+### P0-081 Proposal narrative
+Generate clear recommendation summary from deterministic results.
+
+### P0-082 Proposal PDF
+Generate downloadable PDF proposal summary.
+
+### P1-083 Proposal version history
+Store regenerated proposals and track versions.
+
+---
+
+## 11. Epic: Lead Activation & Conversion
+
+### P0-090 Email proposal request
+Allow proposal delivery by email.
+
+### P0-091 WhatsApp CTA
+Launch WhatsApp with preloaded context.
+
+### P0-092 Call booking integration
+Allow user to book a call.
+
+### P1-093 Reservation flow
+Support reservation / deposit flow.
+
+### P2-094 Online contracting eligibility engine
+Determine if a lead can contract online.
+
+### P2-095 Online contracting flow
+Implement digital contracting for eligible cases.
+
+---
+
+## 12. Epic: Admin Portal
+
+### P0-100 Admin auth and roles
+Create secure admin access.
+
+### P0-101 Product management
+CRUD for panels, inverters, batteries, accessories.
+
+### P0-102 Pricing management
+CRUD for sale price, cost, labor, margin, bundles.
+
+### P0-103 Lead management
+List, filter, inspect, and update leads.
+
+### P0-104 Proposal / simulation inspection
+Allow Revotek to inspect generated outputs.
+
+### P1-105 Financing option management
+Manage financing providers and display settings.
+
+### P1-106 Tax content management
+Update tax explanation content and disclaimers.
+
+### P1-107 Scheduling configuration
+Manage calendars, slots, and assignment rules.
+
+### P1-108 Conversion rule management
+Configure CTA visibility by lead profile.
+
+---
+
+## 13. Epic: Analytics & Observability
+
+### P0-110 Funnel analytics
+Track calculator start, completion, lead conversion.
+
+### P0-111 Parser analytics
+Track parsing success and confidence distribution.
+
+### P1-112 Estimate accuracy analytics
+Compare estimator outputs against signed projects.
+
+### P1-113 Conversion analytics by province
+Track performance by local landing page and geography.
+
+---
+
+## 14. Epic: Hardening
+
+### P0-120 Error handling and empty states
+Ensure failures do not kill conversion.
+
+### P0-121 Logging and monitoring
+Add monitoring for parsing and calculation services.
+
+### P0-122 GDPR basics
+Capture consent and manage data retention policy.
+
+### P1-123 Admin audit log
+Track admin changes to catalog and pricing.
+
+### P1-124 Rate limiting and abuse protection
+Protect uploads and public endpoints.
+
+---
+
+## 15. Suggested Sprint Order
+
+## Sprint 1
+- foundation
+- app skeleton
+- homepage
+- calculator skeleton
+- DB schema v1
+
+## Sprint 2
+- lead capture
+- property and usage steps
+- upload pipeline
+- parser v1 spike
+
+## Sprint 3
+- annualization engine
+- product schema
+- recommendation rules v1
+- PVGIS integration
+
+## Sprint 4
+- savings engine
+- financing v1
+- tax guidance v1
+- results page v1
+
+## Sprint 5
+- proposal PDF
+- admin product management
+- admin lead management
+- email + WhatsApp CTAs
+
+## Sprint 6
+- scheduling
+- SEO local templates
+- analytics basics
+- QA and hardening
+
+---
+
+## 16. Open Questions
+
+1. Which electricity providers must be supported first?
+2. Will Revotek start with residential only?
+3. Should battery recommendation be conservative by default?
+4. What financing providers and terms should be shown at launch?
+5. Will the company accept deposits online in v1?
+6. Does Revotek already have a CRM that should receive leads?
+7. What is the exact service area and installation policy by province?
+8. How much of the proposal should be visible before lead submission?
+
